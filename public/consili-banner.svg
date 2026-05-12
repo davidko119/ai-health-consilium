@@ -1,0 +1,56 @@
+<svg width="1712" height="967" viewBox="0 0 1712 967" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1712" height="967" fill="#FAFAF8"/>
+  <g transform="translate(447 106)" stroke="#050505" stroke-width="20" stroke-linecap="round">
+    <path d="M125 7v50"/>
+    <path d="M125 193v50"/>
+    <path d="M7 125h50"/>
+    <path d="M193 125h50"/>
+    <path d="M42 42l36 36"/>
+    <path d="M172 172l36 36"/>
+    <path d="M208 42l-36 36"/>
+    <path d="M78 172l-36 36"/>
+  </g>
+  <text x="745" y="287" fill="#050505" font-family="Segoe UI, Arial, sans-serif" font-size="160" font-weight="400" letter-spacing="2">Consili</text>
+
+  <g transform="translate(245 385)" stroke="#111" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M100 455c85-35 280-58 468-42 190 16 380 5 548-39" stroke="#EEE8DC" stroke-width="15"/>
+    <path d="M300 120c-12-52 23-96 80-96 70 0 97 56 86 118" fill="#8A531F"/>
+    <path d="M318 110c-30-18-63-9-75 16 28-7 49 5 64 23" fill="#8A531F"/>
+    <path d="M270 156c-55 23-92 81-107 158l123 2c13-48 39-89 77-119" fill="#F5C642"/>
+    <path d="M158 315c28 74 100 116 196 129l40-85c-66-9-113-31-143-68" fill="#F5C642"/>
+    <path d="M368 168c36 7 70-7 89-36 12 29 5 63-21 84-28 21-67 17-89-9"/>
+    <path d="M374 222c-12 68-5 122 22 163" fill="none"/>
+    <path d="M292 455l160 8 16-93-162-10z" fill="#F8F6EF"/>
+    <path d="M309 377l88 72"/>
+    <path d="M475 366l114 78" fill="none"/>
+    <path d="M199 402h84v95h-84z" fill="#F8F6EF"/>
+    <path d="M208 328h17v74h-17zM236 315h17v87h-17zM265 332h17v70h-17z" fill="#E8FFF8"/>
+    <path d="M215 374h10M243 363h10M272 376h10"/>
+
+    <path d="M680 108c7-63 50-94 107-85 63 10 92 58 91 117" fill="#975D22"/>
+    <path d="M652 330c8-97 45-160 111-189 48 44 99 51 153 19 60 43 90 106 98 184l-133 14-28-92-42 93-159-29z" fill="#F8F8F3"/>
+    <path d="M763 142c37 35 87 32 122-8 9 39-12 77-51 91-39 13-81-3-101-37"/>
+    <path d="M724 226c-40 54-54 113-41 178"/>
+    <path d="M884 229c21 38 35 77 39 119"/>
+    <path d="M806 324h138v117H806z" fill="#D9E7DE"/>
+    <path d="M836 302l34 23M880 302l-34 23"/>
+    <path d="M862 323v89M826 412h72M848 441h28"/>
+    <path d="M744 428l-70 80 121 15 39-88z" fill="#F8F6EF"/>
+    <path d="M1010 416l-94 54 127 34 51-61z" fill="#F8F6EF"/>
+
+    <path d="M1195 102c-2-68 43-104 102-101 67 3 108 50 105 120" fill="#202020"/>
+    <path d="M1178 336c9-95 55-151 135-172 73 20 118 76 134 168l-115 18-26-75-33 78-95-17z" fill="#F8F8F3"/>
+    <path d="M1252 147c31 44 88 46 125 10 4 40-23 75-65 82-39 6-76-17-88-54"/>
+    <circle cx="1252" cy="156" r="21" fill="none"/>
+    <circle cx="1314" cy="154" r="21" fill="none"/>
+    <path d="M1273 155h20"/>
+    <path d="M1198 246l-55 29 20 58 59-24z" fill="#F8F8F3"/>
+    <path d="M1135 249l36 82"/>
+    <path d="M1119 187h31v91h-31z" fill="#E8FFF8"/>
+    <path d="M1134 188c18-23 39-12 31 12"/>
+    <path d="M1329 332h204l-42 155h-202z" fill="#D7DADF"/>
+    <circle cx="1416" cy="409" r="18" fill="#FAFAF8"/>
+    <path d="M1189 506l152 2 20-59-160-7z" fill="#F8F6EF"/>
+    <path d="M1187 504l50-31M1236 473l49 33M1268 479l47-28"/>
+  </g>
+</svg>
