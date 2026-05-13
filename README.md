@@ -1,6 +1,6 @@
 # 🧬 AI Health Consilium
 
-![AI Health Consilium banner](public/consili-banner.svg)
+![AI Health Consilium banner](public/consili-banner.png)
 
 **AI Health Consilium** is an open-source web application that simulates a panel of AI scientist agents collaborating to find **research gaps** in biomedical and health science. Submit a research problem, and a council of specialized agents debates the evidence, queries the literature, and surfaces testable hypotheses that current science has missed.
 
@@ -122,7 +122,7 @@ ai-health-consilium/
 │   ├── consilium.ts             # Runtime config
 │   └── agents.ts                # Agent-role aliases and budget constants
 ├── types/                       # Shared TypeScript types
-└── public/consili-banner.svg    # Project banner
+└── public/consili-banner.png    # Project banner image
 ```
 
 ***
