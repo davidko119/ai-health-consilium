@@ -25,9 +25,12 @@ export function MarkdownReport({ content, title }: { content: string; title: str
   }
 
   return (
-    <section className="border border-[var(--line)] bg-[var(--surface)]">
+    <section className="rounded-lg border border-[var(--line)] bg-[var(--surface)]">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--line)] px-4 py-3">
-        <h2 className="text-lg font-semibold">Final report</h2>
+        <div>
+          <p className="dashboard-label">Full markdown</p>
+          <h2 className="text-lg font-semibold">Final report</h2>
+        </div>
         <div className="flex gap-2">
           <button className="icon-button" type="button" onClick={copyReport} title="Copy report">
             <Copy size={16} aria-hidden="true" />
@@ -44,7 +47,7 @@ export function MarkdownReport({ content, title }: { content: string; title: str
           </button>
         </div>
       </div>
-      <article className="prose-consilium max-w-none px-5 py-5">
+      <article className="prose-consilium mx-auto max-w-3xl px-5 py-6 md:px-7">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
       </article>
     </section>

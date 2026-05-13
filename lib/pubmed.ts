@@ -78,12 +78,27 @@ export async function searchPubmed(
     email: options.email,
   });
 
-  const response = await fetchWithTimeout(url, { method: "GET" }, options.timeoutMs ?? 30000);
+  let response = await fetchWithTimeout(url, { method: "GET" }, options.timeoutMs ?? 30000);
+  let body = await response.text();
+
+  if (!response.ok && options.apiKey && body.includes("API key invalid")) {
+    const retryUrl = buildUrl("esearch.fcgi", {
+      db: "pubmed",
+      term: query,
+      retmax: maxResults,
+      retmode: "json",
+      sort: "relevance",
+      email: options.email,
+    });
+    response = await fetchWithTimeout(retryUrl, { method: "GET" }, options.timeoutMs ?? 30000);
+    body = await response.text();
+  }
+
   if (!response.ok) {
     throw new Error(`PubMed esearch failed (${response.status}).`);
   }
 
-  const parsed: unknown = await response.json();
+  const parsed: unknown = JSON.parse(body);
   if (!isRecord(parsed) || !isRecord(parsed.esearchresult)) {
     return [];
   }
@@ -143,12 +158,25 @@ async function fetchSummaryRecords(
     email: options.email,
   });
 
-  const response = await fetchWithTimeout(url, { method: "GET" }, options.timeoutMs ?? 30000);
+  let response = await fetchWithTimeout(url, { method: "GET" }, options.timeoutMs ?? 30000);
+  let body = await response.text();
+
+  if (!response.ok && options.apiKey && body.includes("API key invalid")) {
+    const retryUrl = buildUrl("esummary.fcgi", {
+      db: "pubmed",
+      id: pmids.join(","),
+      retmode: "json",
+      email: options.email,
+    });
+    response = await fetchWithTimeout(retryUrl, { method: "GET" }, options.timeoutMs ?? 30000);
+    body = await response.text();
+  }
+
   if (!response.ok) {
     throw new Error(`PubMed esummary failed (${response.status}).`);
   }
 
-  const parsed: unknown = await response.json();
+  const parsed: unknown = JSON.parse(body);
   const result = isRecord(parsed) && isRecord(parsed.result) ? parsed.result : {};
   const map = new Map<string, Record<string, unknown>>();
 
@@ -185,12 +213,25 @@ async function fetchAbstractRecords(
     email: options.email,
   });
 
-  const response = await fetchWithTimeout(url, { method: "GET" }, options.timeoutMs ?? 30000);
+  let response = await fetchWithTimeout(url, { method: "GET" }, options.timeoutMs ?? 30000);
+  let xml = await response.text();
+
+  if (!response.ok && options.apiKey && xml.includes("API key invalid")) {
+    const retryUrl = buildUrl("efetch.fcgi", {
+      db: "pubmed",
+      id: pmids.join(","),
+      retmode: "xml",
+      rettype: "abstract",
+      email: options.email,
+    });
+    response = await fetchWithTimeout(retryUrl, { method: "GET" }, options.timeoutMs ?? 30000);
+    xml = await response.text();
+  }
+
   if (!response.ok) {
     throw new Error(`PubMed efetch failed (${response.status}).`);
   }
 
-  const xml = await response.text();
   const parser = new XMLParser({
     ignoreAttributes: false,
     attributeNamePrefix: "",

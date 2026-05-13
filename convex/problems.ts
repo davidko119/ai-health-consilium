@@ -3,7 +3,20 @@ import { DEFAULT_AGENT_TEMPLATES, SYSTEM_GUARDRAILS } from "../config/consilium"
 import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import { internalMutation, internalQuery, mutation, query } from "./_generated/server";
-import { messageRole, problemStatus, sourceType, stepType, workflowStage } from "./schema";
+import {
+  evidenceLevel,
+  evidenceMap,
+  gapType,
+  messageRole,
+  picoExtraction,
+  problemStatus,
+  referenceEvidenceProfile,
+  sourceType,
+  stepType,
+  structuredStudyProposal,
+  uncertaintyLevel,
+  workflowStage,
+} from "./schema";
 
 const referenceInput = v.object({
   sourceType,
@@ -17,12 +30,14 @@ const referenceInput = v.object({
   rawMetadata: v.optional(v.any()),
   tags: v.array(v.string()),
   cluster: v.optional(v.string()),
+  evidenceProfile: v.optional(referenceEvidenceProfile),
 });
 
 const referenceTagInput = v.object({
   referenceId: v.id("references"),
   tags: v.array(v.string()),
   cluster: v.optional(v.string()),
+  evidenceProfile: v.optional(referenceEvidenceProfile),
 });
 
 const gapInput = v.object({
@@ -30,9 +45,26 @@ const gapInput = v.object({
   agentId: v.optional(v.id("agents")),
   title: v.string(),
   description: v.string(),
+  primaryGapType: v.optional(gapType),
+  secondaryGapType: v.optional(gapType),
+  whyTrueGap: v.optional(v.string()),
+  whatKnown: v.optional(v.string()),
+  whatMissing: v.optional(v.string()),
+  evidenceLevel: v.optional(evidenceLevel),
+  uncertaintyLevel: v.optional(uncertaintyLevel),
   evidenceFor: v.string(),
   evidenceAgainst: v.string(),
   priorityScore: v.optional(v.number()),
+  evidenceScarcity: v.optional(v.number()),
+  actionability: v.optional(v.number()),
+  clinicalRelevance: v.optional(v.number()),
+  mechanisticImportance: v.optional(v.number()),
+  feasibility: v.optional(v.number()),
+  novelty: v.optional(v.number()),
+  distinctiveness: v.optional(v.number()),
+  diversityRationale: v.optional(v.string()),
+  studyProposal: v.optional(structuredStudyProposal),
+  mergedFromTitles: v.optional(v.array(v.string())),
   implementationIdeas: v.array(v.string()),
   linkedReferenceIds: v.array(v.id("references")),
 });
@@ -40,12 +72,26 @@ const gapInput = v.object({
 const gapScoreInput = v.object({
   gapId: v.id("gapCandidates"),
   priorityScore: v.number(),
+  primaryGapType: v.optional(gapType),
+  secondaryGapType: v.optional(gapType),
+  evidenceLevel: v.optional(evidenceLevel),
+  uncertaintyLevel: v.optional(uncertaintyLevel),
   evidenceScarcity: v.optional(v.number()),
   potentialImpact: v.optional(v.number()),
+  actionability: v.optional(v.number()),
+  clinicalRelevance: v.optional(v.number()),
+  mechanisticImportance: v.optional(v.number()),
   feasibility: v.optional(v.number()),
   novelty: v.optional(v.number()),
+  distinctiveness: v.optional(v.number()),
+  diversityRationale: v.optional(v.string()),
+  whyTrueGap: v.optional(v.string()),
+  whatKnown: v.optional(v.string()),
+  whatMissing: v.optional(v.string()),
   evidenceFor: v.optional(v.string()),
   evidenceAgainst: v.optional(v.string()),
+  studyProposal: v.optional(structuredStudyProposal),
+  mergedFromTitles: v.optional(v.array(v.string())),
 });
 
 export const list = query({
@@ -269,6 +315,26 @@ export const setStatus = internalMutation({
   },
 });
 
+export const updateProblemUnderstanding = internalMutation({
+  args: {
+    problemId: v.id("problems"),
+    picoExtraction: v.optional(picoExtraction),
+    evidenceMap: v.optional(evidenceMap),
+  },
+  handler: async (ctx, args) => {
+    const patch: Partial<Doc<"problems">> = {
+      updatedAt: Date.now(),
+    };
+    if (args.picoExtraction) {
+      patch.picoExtraction = args.picoExtraction;
+    }
+    if (args.evidenceMap) {
+      patch.evidenceMap = args.evidenceMap;
+    }
+    await ctx.db.patch(args.problemId, patch);
+  },
+});
+
 export const addMessage = internalMutation({
   args: {
     problemId: v.id("problems"),
@@ -327,6 +393,7 @@ export const insertReferences = internalMutation({
           rawMetadata: reference.rawMetadata,
           tags: [...new Set([...existing.tags, ...reference.tags])],
           cluster: reference.cluster ?? existing.cluster,
+          evidenceProfile: reference.evidenceProfile ?? existing.evidenceProfile,
         });
         created.push(existing._id);
         continue;
@@ -345,6 +412,7 @@ export const insertReferences = internalMutation({
         rawMetadata: reference.rawMetadata,
         tags: reference.tags.slice(0, 12).map((tag) => sanitizeText(tag, 60)),
         cluster: reference.cluster ? sanitizeText(reference.cluster, 120) : undefined,
+        evidenceProfile: reference.evidenceProfile,
         createdAt: Date.now(),
       });
       created.push(referenceId);
@@ -361,6 +429,7 @@ export const patchReferenceTags = internalMutation({
       await ctx.db.patch(update.referenceId, {
         tags: update.tags.slice(0, 12).map((tag) => sanitizeText(tag, 60)),
         cluster: update.cluster ? sanitizeText(update.cluster, 120) : undefined,
+        evidenceProfile: update.evidenceProfile,
       });
     }
   },
@@ -374,9 +443,34 @@ export const insertGapCandidate = internalMutation({
       agentId: args.agentId,
       title: sanitizeText(args.title, 180),
       description: sanitizeText(args.description, 5000),
+      primaryGapType: args.primaryGapType,
+      secondaryGapType: args.secondaryGapType,
+      whyTrueGap: args.whyTrueGap ? sanitizeText(args.whyTrueGap, 2000) : undefined,
+      whatKnown: args.whatKnown ? sanitizeText(args.whatKnown, 2000) : undefined,
+      whatMissing: args.whatMissing ? sanitizeText(args.whatMissing, 2000) : undefined,
+      evidenceLevel: args.evidenceLevel,
+      uncertaintyLevel: args.uncertaintyLevel,
       evidenceFor: sanitizeText(args.evidenceFor, 3000),
       evidenceAgainst: sanitizeText(args.evidenceAgainst, 3000),
       priorityScore: args.priorityScore === undefined ? undefined : clampScore(args.priorityScore),
+      evidenceScarcity:
+        args.evidenceScarcity === undefined ? undefined : clampScore(args.evidenceScarcity),
+      actionability: args.actionability === undefined ? undefined : clampScore(args.actionability),
+      clinicalRelevance:
+        args.clinicalRelevance === undefined ? undefined : clampScore(args.clinicalRelevance),
+      mechanisticImportance:
+        args.mechanisticImportance === undefined
+          ? undefined
+          : clampScore(args.mechanisticImportance),
+      feasibility: args.feasibility === undefined ? undefined : clampScore(args.feasibility),
+      novelty: args.novelty === undefined ? undefined : clampScore(args.novelty),
+      distinctiveness:
+        args.distinctiveness === undefined ? undefined : clampScore(args.distinctiveness),
+      diversityRationale: args.diversityRationale
+        ? sanitizeText(args.diversityRationale, 1000)
+        : undefined,
+      studyProposal: sanitizeStudyProposal(args.studyProposal),
+      mergedFromTitles: args.mergedFromTitles?.slice(0, 8).map((title) => sanitizeText(title, 180)),
       implementationIdeas: args.implementationIdeas
         .slice(0, 8)
         .map((idea) => sanitizeText(idea, 800)),
@@ -393,12 +487,36 @@ export const updateGapScores = internalMutation({
     for (const score of args.scores) {
       const patch: Partial<Doc<"gapCandidates">> = {
         priorityScore: clampScore(score.priorityScore),
+        primaryGapType: score.primaryGapType,
+        secondaryGapType: score.secondaryGapType,
+        evidenceLevel: score.evidenceLevel,
+        uncertaintyLevel: score.uncertaintyLevel,
         evidenceScarcity:
           score.evidenceScarcity === undefined ? undefined : clampScore(score.evidenceScarcity),
         potentialImpact:
           score.potentialImpact === undefined ? undefined : clampScore(score.potentialImpact),
+        actionability:
+          score.actionability === undefined ? undefined : clampScore(score.actionability),
+        clinicalRelevance:
+          score.clinicalRelevance === undefined ? undefined : clampScore(score.clinicalRelevance),
+        mechanisticImportance:
+          score.mechanisticImportance === undefined
+            ? undefined
+            : clampScore(score.mechanisticImportance),
         feasibility: score.feasibility === undefined ? undefined : clampScore(score.feasibility),
         novelty: score.novelty === undefined ? undefined : clampScore(score.novelty),
+        distinctiveness:
+          score.distinctiveness === undefined ? undefined : clampScore(score.distinctiveness),
+        diversityRationale: score.diversityRationale
+          ? sanitizeText(score.diversityRationale, 1000)
+          : undefined,
+        whyTrueGap: score.whyTrueGap ? sanitizeText(score.whyTrueGap, 2000) : undefined,
+        whatKnown: score.whatKnown ? sanitizeText(score.whatKnown, 2000) : undefined,
+        whatMissing: score.whatMissing ? sanitizeText(score.whatMissing, 2000) : undefined,
+        studyProposal: sanitizeStudyProposal(score.studyProposal),
+        mergedFromTitles: score.mergedFromTitles
+          ?.slice(0, 8)
+          .map((title) => sanitizeText(title, 180)),
         updatedAt: Date.now(),
       };
       if (score.evidenceFor) {
@@ -454,6 +572,39 @@ function sumDefined(values: (number | undefined)[]): number {
 
 function sanitizeText(value: string, maxLength: number): string {
   return value.replace(/\s+\n/g, "\n").replace(/[ \t]+/g, " ").trim().slice(0, maxLength);
+}
+
+function sanitizeStudyProposal(
+  proposal:
+    | {
+        objective: string;
+        population: string;
+        interventionOrExposure: string;
+        comparator: string;
+        primaryOutcomes: string[];
+        secondaryOutcomes: string[];
+        biomarkers: string[];
+        studyDesign: string;
+        feasibilityNotes: string;
+        whyThisDesignAddressesGap: string;
+      }
+    | undefined,
+) {
+  if (!proposal) {
+    return undefined;
+  }
+  return {
+    objective: sanitizeText(proposal.objective, 1000),
+    population: sanitizeText(proposal.population, 1000),
+    interventionOrExposure: sanitizeText(proposal.interventionOrExposure, 1000),
+    comparator: sanitizeText(proposal.comparator, 1000),
+    primaryOutcomes: proposal.primaryOutcomes.slice(0, 8).map((item) => sanitizeText(item, 220)),
+    secondaryOutcomes: proposal.secondaryOutcomes.slice(0, 8).map((item) => sanitizeText(item, 220)),
+    biomarkers: proposal.biomarkers.slice(0, 8).map((item) => sanitizeText(item, 160)),
+    studyDesign: sanitizeText(proposal.studyDesign, 1000),
+    feasibilityNotes: sanitizeText(proposal.feasibilityNotes, 1000),
+    whyThisDesignAddressesGap: sanitizeText(proposal.whyThisDesignAddressesGap, 1200),
+  };
 }
 
 function clampScore(value: number): number {

@@ -80,7 +80,7 @@ npx convex env set NCBI_API_KEY "..."
 npx convex env set NCBI_EMAIL "you@example.com"
 npx convex env set APIFY_TOKEN "..."
 npx convex env set APIFY_ACTOR_ID "user/actor-name"
-npx convex env set APIFY_ACTOR_INPUT_JSON '{"query":"{{query}}","maxItems":{{maxItems}}}'
+npx convex env set APIFY_ACTOR_INPUT_JSON '{"query":"{{query}}","maxItems":{{maxItems}}}' # only for search-style actors
 npx convex env set EXA_API_KEY "..."
 ```
 
@@ -90,6 +90,7 @@ Apify is optional. If `EXA_API_KEY` is set, the app already has semantic web gro
 
 - `APIFY_ACTOR_ID` is copied from the actor page in Apify Store or Console. If the actor URL contains `apify~website-content-crawler`, use `apify/website-content-crawler`. If it belongs to your account, use `your-username/your-actor-name`.
 - `APIFY_ACTOR_INPUT_JSON` is optional. Leave it empty unless the chosen actor needs a custom input shape. The app can replace `{{query}}`, `{{maxItems}}`, and `{{startUrls}}` inside the JSON template.
+- For `apify/website-content-crawler`, leave `APIFY_ACTOR_INPUT_JSON` empty. The app will crawl URLs found by Exa.
 - Example template for a search-style actor:
 
 ```json
@@ -182,27 +183,35 @@ Each Consilium session instantiates 5 AI scientist agents. Their roles and syste
 
 ## 🔄 Research Pipeline
 
-Each Consilium session runs a 5-step pipeline:
+Each Consilium session runs a quality-gated pipeline designed to avoid redundant gaps:
 
 ```text
-Step 1: Problem Clarification
-        └── Agents refine the question, propose sub-questions
+Stage 1: Query understanding
+        └── Extracts PICO with explicit / inferred / unclear status
+        └── Flags ambiguous phrases such as broad "BDNF modulation"
 
-Step 2: Literature Collection
+Stage 2: Literature Collection
         └── PubMed search + Exa/Apify web scraping
-        └── LLM tags and clusters references
+        └── Tags references by population, intervention, species, age relevance, and evidence level
 
-Step 3: Expert Debate
-        └── Agents take turns: summarize → critique → propose gaps
-        └── N rounds configurable in config/consilium.ts
+Stage 3: Evidence synthesis
+        └── Analyst separates direct, indirect, preclinical, and speculative support
+        └── Evidence Grader creates a structured evidence map
 
-Step 4: Gap Evaluation
-        └── Gap Seeker scores all gap candidates (0–100)
-        └── Ranked by evidence scarcity, impact, feasibility, and novelty
+Stage 4: Gap proposal
+        └── Gap Finder proposes 8–12 candidate gaps with primary / secondary gap types
+        └── Each candidate includes a structured study proposal
 
-Step 5: Final Report
-        └── Structured markdown report with top 3–5 research gaps
-        └── Each gap includes evidence, rationale, and proposed study design
+Stage 5: Adversarial critique
+        └── Skeptic attacks overlap, vague interventions, missing comparators, weak outcomes, and overreach
+        └── Evidence Grader checks directness and uncertainty
+
+Stage 6: Reranking + diversification
+        └── Scores novelty, scarcity, actionability, clinical relevance, mechanism, feasibility, and distinctiveness
+        └── Penalizes near-duplicates and keeps top gaps diverse by type whenever possible
+
+Stage 7: Final Report
+        └── Fixed PICO / Evidence Map / Top Gaps / Study Proposals / Limitations / Final Answer structure
 ```
 
 ***

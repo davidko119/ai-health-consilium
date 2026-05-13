@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     "convex/_generated/**",
     "ebook/**",
+    ".chrome-ui-check/**",
+    "avatars/**",
   ]),
 ]);
 

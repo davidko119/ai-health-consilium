@@ -77,3 +77,33 @@ export const SYSTEM_GUARDRAILS = [
   "Separate what is known, unknown, weakly supported, and speculative.",
   "Avoid inventing papers, statistics, guidelines, or citations.",
 ].join("\n");
+
+export const ROLE_PROMPTS = {
+  analyst:
+    "Internal role: Analyst. Summarize what the retrieved evidence directly supports, what it only indirectly suggests, and which claims are not supported. Keep intervention, population, comparator, and outcome boundaries explicit.",
+  gapFinder:
+    "Internal role: Gap Finder. Propose diverse, testable research gaps. Avoid near-duplicates and avoid vague gaps that merely say mechanisms are unclear. Each gap must have one primary gap type and a structured study proposal.",
+  skeptic:
+    "Internal role: Skeptic / Critic. Attack redundancy, unsupported extrapolation from animal or indirect studies, vague interventions, missing comparators, weak outcomes, and duplicated mechanism framing.",
+  evidenceGrader:
+    "Internal role: Evidence Grader. Classify directness and uncertainty. Explicitly label direct human CP adolescent evidence, broader CP evidence, indirect neurological evidence, preclinical evidence, and speculation.",
+  finalJudge:
+    "Internal role: Final Judge. Synthesize the debate into one conservative report with diverse, non-redundant top gaps and exact PICO/evidence-level structure.",
+} as const;
+
+export const DOMAIN_SPECIAL_RULES = [
+  "For BDNF-related cerebral palsy questions, never treat 'BDNF modulation' as a single intervention.",
+  "Separate rehabilitation-induced endogenous BDNF change, non-invasive brain stimulation effects, pharmacologic modulation, nutritional modulation, stem-cell/regenerative approaches, genetic moderators such as Val66Met, and biomarker association versus causal intervention.",
+  "Do not imply clinical efficacy when evidence is associative, indirect, mechanistic, or preclinical.",
+  "Explicitly call out when adolescent-specific cerebral palsy evidence is missing.",
+].join("\n");
+
+export const REPORT_STRUCTURE = [
+  "## Reformulated Clinical/Research Question",
+  "## PICO Extraction",
+  "## Evidence Map",
+  "## Top Research Gaps",
+  "## Ranked Study Proposals",
+  "## Limitations",
+  "## Final Answer",
+].join("\n");

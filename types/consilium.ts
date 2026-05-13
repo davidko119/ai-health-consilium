@@ -27,6 +27,83 @@ export type SourceType = "pubmed" | "web" | "other";
 
 export type ChatRole = "system" | "user" | "assistant";
 
+export const GAP_TYPES = [
+  "mechanism",
+  "intervention",
+  "comparator",
+  "population_subgroup",
+  "biomarker_measurement",
+  "study_design_methodology",
+  "translational",
+  "safety_feasibility",
+  "long_term_outcome",
+] as const;
+
+export type GapType = (typeof GAP_TYPES)[number];
+
+export const EVIDENCE_LEVELS = [
+  "direct_human_cp_adolescents",
+  "human_cp_broader_age",
+  "indirect_human_other_neurological",
+  "preclinical_animal",
+  "mechanistic_speculation",
+] as const;
+
+export type EvidenceLevel = (typeof EVIDENCE_LEVELS)[number];
+
+export const UNCERTAINTY_LEVELS = ["low", "moderate", "high", "very_high"] as const;
+
+export type UncertaintyLevel = (typeof UNCERTAINTY_LEVELS)[number];
+
+export type PicoFieldStatus = "explicit" | "inferred" | "unclear";
+
+export interface PicoField {
+  value: string;
+  status: PicoFieldStatus;
+  rationale?: string;
+}
+
+export interface PicoExtraction {
+  population: PicoField;
+  intervention: PicoField;
+  comparator: PicoField;
+  outcomes: PicoField;
+  context: PicoField;
+  mechanisticHypothesis: PicoField;
+  ambiguousTerms: string[];
+}
+
+export interface EvidenceMap {
+  directlySupported: string[];
+  indirectlySupported: string[];
+  preclinicalOnly: string[];
+  speculative: string[];
+  caveats: string[];
+}
+
+export interface ReferenceEvidenceProfile {
+  populationTags: string[];
+  interventionTypes: string[];
+  evidenceType: string;
+  outcomeTypes: string[];
+  species: "human" | "animal" | "mixed" | "unclear";
+  ageRelevance: "adolescent_specific" | "pediatric" | "adult" | "mixed_or_unclear";
+  evidenceLevel: EvidenceLevel;
+}
+
+export interface StructuredStudyProposal {
+  objective: string;
+  population: string;
+  interventionOrExposure: string;
+  comparator: string;
+  primaryOutcomes: string[];
+  secondaryOutcomes: string[];
+  biomarkers: string[];
+  studyDesign: string;
+  feasibilityNotes: string;
+  whyThisDesignAddressesGap: string;
+}
+
 export interface ChatMessage {
   role: ChatRole;
   content: string;
@@ -94,9 +171,24 @@ export interface SearchPlan {
 export interface GapProposal {
   title: string;
   description: string;
+  primaryGapType?: GapType;
+  secondaryGapType?: GapType;
+  whyTrueGap?: string;
+  whatKnown?: string;
+  whatMissing?: string;
+  evidenceLevel?: EvidenceLevel;
+  uncertaintyLevel?: UncertaintyLevel;
   evidenceFor: string;
   evidenceAgainst: string;
   priorityScore?: number;
+  novelty?: number;
+  evidenceScarcity?: number;
+  actionability?: number;
+  clinicalRelevance?: number;
+  mechanisticImportance?: number;
+  feasibility?: number;
+  distinctiveness?: number;
+  studyProposal?: StructuredStudyProposal;
   implementationIdeas: string[];
   linkedReferenceIds?: string[];
 }
@@ -104,10 +196,18 @@ export interface GapProposal {
 export interface GapScore {
   title: string;
   priorityScore: number;
+  primaryGapType?: GapType;
+  secondaryGapType?: GapType;
+  evidenceLevel?: EvidenceLevel;
+  uncertaintyLevel?: UncertaintyLevel;
   evidenceScarcity: number;
-  potentialImpact: number;
+  actionability: number;
+  clinicalRelevance: number;
+  mechanisticImportance: number;
   feasibility: number;
   novelty: number;
+  distinctiveness: number;
+  potentialImpact?: number;
   justification: string;
 }
 
@@ -115,4 +215,5 @@ export interface ReferenceClusterTag {
   sourceId: string;
   tags: string[];
   cluster: string;
+  evidenceProfile?: ReferenceEvidenceProfile;
 }
