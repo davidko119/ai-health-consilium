@@ -25,6 +25,7 @@
 *.pem
 .agents/
 skills-lock.json
+ebook/
 
 # debug
 npm-debug.log*

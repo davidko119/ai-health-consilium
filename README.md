@@ -66,6 +66,7 @@ NCBI_EMAIL=you@example.com
 # Apify — optional
 APIFY_TOKEN=apify_api_...
 APIFY_ACTOR_ID=user/actor-name
+APIFY_ACTOR_INPUT_JSON=
 
 # Exa — optional semantic web search
 EXA_API_KEY=your_exa_key
@@ -79,8 +80,29 @@ npx convex env set NCBI_API_KEY "..."
 npx convex env set NCBI_EMAIL "you@example.com"
 npx convex env set APIFY_TOKEN "..."
 npx convex env set APIFY_ACTOR_ID "user/actor-name"
+npx convex env set APIFY_ACTOR_INPUT_JSON '{"query":"{{query}}","maxItems":{{maxItems}}}'
 npx convex env set EXA_API_KEY "..."
 ```
+
+### Apify actor settings
+
+Apify is optional. If `EXA_API_KEY` is set, the app already has semantic web grounding through Exa. Use Apify only when you want a specific crawler/scraper actor.
+
+- `APIFY_ACTOR_ID` is copied from the actor page in Apify Store or Console. If the actor URL contains `apify~website-content-crawler`, use `apify/website-content-crawler`. If it belongs to your account, use `your-username/your-actor-name`.
+- `APIFY_ACTOR_INPUT_JSON` is optional. Leave it empty unless the chosen actor needs a custom input shape. The app can replace `{{query}}`, `{{maxItems}}`, and `{{startUrls}}` inside the JSON template.
+- Example template for a search-style actor:
+
+```json
+{"query":"{{query}}","maxItems":{{maxItems}}}
+```
+
+- Example template for a crawler-style actor where you provide URLs:
+
+```json
+{"startUrls":{{startUrls}},"maxCrawlPages":{{maxItems}},"proxyConfiguration":{"useApifyProxy":true}}
+```
+
+The exact input fields depend on the actor you choose; copy them from that actor's Input tab in Apify.
 
 ### 4. Set up Convex
 

@@ -6,6 +6,8 @@ export interface ExaSearchOptions {
   apiKey?: string;
   query: string;
   maxResults: number;
+  searchType?: "auto" | "fast" | "instant" | "deep-lite" | "deep" | "deep-reasoning";
+  maxHighlightCharacters?: number;
   timeoutMs?: number;
 }
 
@@ -14,6 +16,7 @@ interface ExaResult {
   title?: string;
   url?: string;
   text?: string;
+  highlights?: string[];
   publishedDate?: string;
   author?: string;
 }
@@ -45,6 +48,9 @@ function parseResult(value: unknown): ExaResult | null {
     title: typeof value.title === "string" ? value.title : undefined,
     url: typeof value.url === "string" ? value.url : undefined,
     text: typeof value.text === "string" ? value.text : undefined,
+    highlights: Array.isArray(value.highlights)
+      ? value.highlights.filter((highlight): highlight is string => typeof highlight === "string")
+      : undefined,
     publishedDate: typeof value.publishedDate === "string" ? value.publishedDate : undefined,
     author: typeof value.author === "string" ? value.author : undefined,
   };
@@ -65,12 +71,17 @@ export async function searchExa(options: ExaSearchOptions): Promise<WebReference
       },
       body: JSON.stringify({
         query: options.query,
-        type: "neural",
+        type: options.searchType ?? "deep",
         numResults: options.maxResults,
-        contents: { text: { maxCharacters: 1800 } },
+        contents: {
+          highlights:
+            options.maxHighlightCharacters === undefined
+              ? true
+              : { maxCharacters: options.maxHighlightCharacters },
+        },
       }),
     },
-    options.timeoutMs ?? 45000,
+    options.timeoutMs ?? 60000,
   );
 
   const text = await response.text();
@@ -88,7 +99,7 @@ export async function searchExa(options: ExaSearchOptions): Promise<WebReference
       sourceId: result.id ?? result.url,
       title: result.title ?? result.url ?? `Exa result ${index + 1}`,
       url: result.url,
-      snippet: result.text,
+      snippet: result.highlights?.join("\n\n") ?? result.text,
       fullText: result.text,
       rawMetadata: { ...result },
     }));
